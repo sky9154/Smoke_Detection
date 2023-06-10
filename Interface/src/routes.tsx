@@ -1,6 +1,7 @@
 import { FC, lazy, LazyExoticComponent, Suspense } from 'react';
-import { BrowserView, MobileView } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import LoadingScreen from './components/LoadingScreen';
+import { Navigate } from 'react-router-dom';
 
 
 const loadable = (Component: LazyExoticComponent<FC>) => (props: any) => (
@@ -17,15 +18,24 @@ const routes = [
   {
     exact: true,
     path: '/',
-    element: (
-      <>
-        <BrowserView>
-          <Camera />
-        </BrowserView>
-        <MobileView>
-          <Report />
-        </MobileView>
-      </>
+    element: (isMobile) ? (
+      <Navigate to="/report" />
+    ) : (
+      <Navigate to="/camera" />
+    )
+  }, {
+    path: '/camera',
+    element: (isMobile) ? (
+      <Navigate to="/report" />
+    ) : (
+      <Camera />
+    ),
+  }, {
+    path: '/report',
+    element: (isMobile) ? (
+      <Report />
+    ) : (
+      <Navigate to="/camera" />
     )
   }, {
     path: '*',
