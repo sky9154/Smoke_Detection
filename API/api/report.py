@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, Response, WebSocket
+from fastapi import APIRouter, File, UploadFile, HTTPException
 import uuid
 import functions.report as report
 
@@ -18,12 +18,9 @@ async def upload (
   await report.write(message, name)
 
 
-@router.websocket('/report/get')
-async def get (websocket: WebSocket, response: Response):
-  response.headers['x-content-type-options'] = 'nosniff'
-
-  try:
-    await websocket.accept()
-    await report.get(websocket)
-  except Exception as e:
-    print(f'ERROR:    {e}')
+@router.get('/report/get')
+async def get ():
+  if await report.get() is None:
+    raise HTTPException(404, 'Report data not found')
+  else:
+    return await report.get()

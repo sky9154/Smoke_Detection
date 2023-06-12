@@ -29,7 +29,7 @@ const Report: FC = () => {
 
   const handleUpload = async () => {
     if (uploadImage) {
-      await report(message, uploadImage);
+      await report.upload(message, uploadImage);
     }
   };
 
