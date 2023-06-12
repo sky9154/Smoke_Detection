@@ -24,13 +24,8 @@ def create_app ():
 
 app = create_app()
 
-routers = [
-  api.stream_router,
-  api.report_router
-]
-
-for router in routers:
-  app.include_router(router, prefix='/api')
+app.include_router(api.stream_router, prefix='/ws')
+app.include_router(api.report_router, prefix='/api')
 
 HOST = os.getenv('HOST')
 PORT = int(os.getenv('PORT'))
