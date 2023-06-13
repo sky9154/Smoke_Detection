@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { useRoutes } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import routes from './routes';
@@ -24,6 +25,7 @@ const App: FC = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <Toaster />
       {allPages}
     </ThemeProvider>
   );
