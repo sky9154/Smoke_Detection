@@ -1,7 +1,5 @@
-interface ReportMessage {
-  time: string,
-  message: string
-}
+import toast from 'react-hot-toast';
+
 
 /**
  * 傳送檢舉紀錄
@@ -21,37 +19,11 @@ const upload = async (message: string, image: File) => {
   };
 
   await fetch(url, requestOptions);
-}
 
-const get = async (
-  loading: (loading: boolean) => void,
-  message: (message: ReportMessage) => void,
-  image: (image: string) => void
-) => {
-  const url = `http://${process.env.REACT_APP_HOST}:${process.env.REACT_APP_PORT}/api/report/get`;
-
-  await fetch(url).then(async (response: Response) => {
-    const result: {
-      time: string,
-      message: string,
-      image: string
-    } = await response.json();
-
-    if (response.ok) {
-      loading(true);
-      
-      message({
-        time: result.time,
-        message: result.message
-      });
-
-      image(`data:image/png;base64,${result.image}`);
-    }
-  });
+  toast.success('上傳成功!');
 }
 
 const report = {
-  upload,
-  get
+  upload
 }
 export default report;

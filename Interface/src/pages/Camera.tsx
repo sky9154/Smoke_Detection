@@ -4,9 +4,7 @@ import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import Grid from '@mui/material/Unstable_Grid2';
-import { useInterval } from '../functions/hooks';
 import { Paragraph } from '../components/Typography';
-import report from '../api/report';
 
 
 interface ReportMessage {
@@ -18,8 +16,7 @@ interface ReportMessage {
 const Camera: FC = () => {
   const cameraRef = useRef<WebSocket | null>(null);
   
-  const [reportLoading, setReportLoading] = useState<boolean>(false);
-  const [cameraLoading, setCameraLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [camera, setCamera] = useState<string>('');
   const [reportImage, setReportImage] = useState<string>('');
   const [reportMessage, setReportMessage] = useState<ReportMessage>({
@@ -29,7 +26,7 @@ const Camera: FC = () => {
 
   const closeSocket = () => {
     if (cameraRef.current) {
-      setCameraLoading(false);
+      setLoading(false);
 
       cameraRef.current.close();
     }
@@ -40,19 +37,31 @@ const Camera: FC = () => {
     cameraRef.current.binaryType = 'arraybuffer';
 
     cameraRef.current.onmessage = (event) => {
-      const blob = new Blob([event.data], { type: 'image/jpeg' });
-      const frame = URL.createObjectURL(blob);
+      setLoading(true);
 
-      setCameraLoading(true);
-      setCamera(frame);
+      if (typeof (event.data) === 'string') {
+        const result: {
+          time: string,
+          message: string,
+          image: string
+        } = JSON.parse(event.data);
+
+        setReportMessage({
+          time: result.time,
+          message: result.message
+        });
+  
+        setReportImage(`data:image/png;base64,${result.image}`);
+      } else {
+        const blob = new Blob([event.data], { type: 'image/jpeg' });
+        const frame = URL.createObjectURL(blob);
+  
+        setCamera(frame);
+      }
     };
 
     return () => closeSocket();
   }, []);
-
-  useInterval(() => {
-    report.get(setReportLoading, setReportMessage, setReportImage);
-  }, 10000);
 
   return (
     <Grid
@@ -68,7 +77,7 @@ const Camera: FC = () => {
           justifyContent="center"
           width="100%"
         >
-          {(cameraLoading) ? (
+          {(loading) ? (
             <img
               src={camera}
               alt="video"
@@ -94,7 +103,7 @@ const Camera: FC = () => {
           divider={<Divider orientation="vertical" flexItem />}
           spacing={4}
         >
-          {(reportLoading) ? (
+          {(loading) ? (
             <img
               src={reportImage}
               alt="reportImage"
@@ -110,7 +119,7 @@ const Camera: FC = () => {
             />
           )}
           <Paragraph width="300px">
-            {(reportLoading) ? (
+            {(loading) ? (
               <>
                 檢舉時間:<br />
                 {reportMessage.time}

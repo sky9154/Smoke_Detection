@@ -1,26 +1,34 @@
-from time import gmtime, strftime
+from fastapi import WebSocket
+from datetime import datetime
 import csv
 import cv2
+import uuid
 import base64
 import functions.image as func_image
 
 
-async def write (message: str, image: str):
+async def write (message: str, image) -> None:
   '''
   寫入檢舉紀錄
   '''
+
+  currentDateTime = datetime.now()
+  name = f'{uuid.uuid4()}.png'
+
+  with open(f'temp/upload/{name}', 'wb') as buffer:
+    buffer.write(image)
   
   with open('database/report.csv', 'a+', newline='') as report:
     writer = csv.writer(report)
-    
+
     writer.writerow([
-      strftime('%Y-%m-%d %H:%M:%S', gmtime()),
+      currentDateTime.strftime('%Y-%m-%d %H:%M:%S'),
       message,
-      image
+      name
     ])
 
-  
-async def get () -> (dict | None):
+
+async def get (websocket: WebSocket) -> (dict | None):
   '''
   取出檢舉紀錄
   '''
@@ -38,10 +46,10 @@ async def get () -> (dict | None):
       image = buffer.tobytes()
       image = base64.b64encode(image).decode('utf-8')
 
-      return dict({
+      await websocket.send_json(dict({
         'time': result['time'],
         'message': result['message'],
         'image': image
-      })
+      }))
     else:
       return None
