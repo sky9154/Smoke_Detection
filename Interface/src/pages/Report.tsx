@@ -37,7 +37,7 @@ const Report: FC = () => {
     <Box display="flex" justifyContent="center">
       <Stack
         direction="column"
-        mt={15}
+        mt={10}
         spacing={2}
         width="70%"
       >
@@ -71,15 +71,15 @@ const Report: FC = () => {
           {(imageUrl === '') ? (
             <Skeleton
               variant="rounded"
-              width="100%"
-              height={150}
+              width="320px"
+              height="240px"
             />
           ) : (
             <img
               src={imageUrl}
               alt="uploadImage"
-              width="100%"
-              height={150}
+              width="320px"
+              height="240px"
             />
           )}
         </Box>

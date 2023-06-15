@@ -17,10 +17,13 @@ const upload = async (message: string, image: File) => {
     method: 'POST',
     body: formData
   };
+  const loading = toast.loading('上傳中...',);
 
-  await fetch(url, requestOptions);
-
-  toast.success('上傳成功!');
+  await fetch(url, requestOptions).then(async (response: Response) => {
+    if (response.ok) {
+      toast.success('上傳成功!', { id: loading });
+    }
+  });
 }
 
 const report = {

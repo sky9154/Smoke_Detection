@@ -4,8 +4,9 @@ import csv
 import cv2
 import uuid
 import base64
-import functions.image as func_image
 
+
+name = ''
 
 async def write (message: str, image) -> None:
   '''
@@ -33,23 +34,25 @@ async def get (websocket: WebSocket) -> (dict | None):
   取出檢舉紀錄
   '''
 
+  global name
+
   with open('database/report.csv') as report:
     results = list(csv.DictReader(report))
 
     if len(results) != 0:
       result = results[-1]
-      image = cv2.imread(f'temp/upload/{result["image"]}')
 
-      image = func_image.process(image)
+      if name != result['image']:
+        name = result['image']
+        
+        image = cv2.imread(f'temp/upload/{name}')
 
-      success, buffer = cv2.imencode('.png', image)
-      image = buffer.tobytes()
-      image = base64.b64encode(image).decode('utf-8')
+        success, buffer = cv2.imencode('.png', image)
+        image = buffer.tobytes()
+        image = base64.b64encode(image).decode('utf-8')
 
-      await websocket.send_json(dict({
-        'time': result['time'],
-        'message': result['message'],
-        'image': image
-      }))
-    else:
-      return None
+        await websocket.send_json(dict({
+          'time': result['time'],
+          'message': result['message'],
+          'image': image
+        }))
