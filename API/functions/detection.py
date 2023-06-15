@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import cv2
 import torch
 import os
+import base64
 import functions.notification as notification
 
 
@@ -29,6 +30,9 @@ async def stream (websocket: WebSocket, frame):
       'model/model.pt'
     )
 
+  success, buffer = cv2.imencode('.png', frame)
+  image_bytes = buffer.tobytes()
+
   if index == STEP:
     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -37,17 +41,18 @@ async def stream (websocket: WebSocket, frame):
     smoke_detections = detections[detections['name'] == 'smoke']
 
     if len(smoke_detections) > 0:
-      cv2.imwrite('temp/images/smoke.png', image)
+      cv2.imwrite('temp/images/smoke.png', frame)
 
       # notification.line_notify('檢測到抽菸')
-      
-      print('檢測到抽菸')
+
+      smoke_image = base64.b64encode(image_bytes).decode('utf-8')
+
+      await websocket.send_text(smoke_image)
+    
+    print('檢測到抽菸')
     
     index = 0
 
   index += 1
 
-  success, buffer = cv2.imencode('.png', frame)
-  frame = buffer.tobytes()
-
-  await websocket.send_bytes(frame)
+  await websocket.send_bytes(image_bytes)
