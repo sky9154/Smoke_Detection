@@ -47,7 +47,10 @@ async def stream (websocket: WebSocket, frame):
 
       smoke_image = base64.b64encode(image_bytes).decode('utf-8')
 
-      await websocket.send_text(smoke_image)
+      await websocket.send_json({
+        'head': 'smoke',
+        'body': smoke_image
+      })
     
     print('檢測到抽菸')
     

@@ -51,8 +51,11 @@ async def get (websocket: WebSocket) -> (dict | None):
         image = buffer.tobytes()
         image = base64.b64encode(image).decode('utf-8')
 
-        await websocket.send_json(dict({
-          'time': result['time'],
-          'message': result['message'],
-          'image': image
-        }))
+        await websocket.send_json({
+          'head': 'report',
+          'body': {
+            'time': result['time'],
+            'message': result['message'],
+            'image': image
+          }
+        })

@@ -24,8 +24,8 @@ def create_app ():
 
 app = create_app()
 
-app.include_router(api.stream_router, prefix='/ws')
-app.include_router(api.report_router, prefix='/api')
+app.include_router(api.Stream, prefix='/ws')
+app.include_router(api.Report, prefix='/api')
 
 HOST = os.getenv('HOST')
 PORT = int(os.getenv('PORT'))

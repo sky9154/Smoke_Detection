@@ -11,7 +11,7 @@ interface ReportMessage {
 }
 
 
-const Camera: FC = () => {
+const Home: FC = () => {
   const cameraRef = useRef<WebSocket | null>(null);
 
   const [cameraLoading, setCameraLoading] = useState<boolean>(false);
@@ -19,7 +19,7 @@ const Camera: FC = () => {
   const [reportLoading, setReportLoading] = useState<boolean>(false);
 
   const [camera, setCamera] = useState<string>('');
-  const [smoke, setSmoke] = useState<string>('');
+  const [smokeImage, setSmokeImage] = useState<string>('');
   const [reportImage, setReportImage] = useState<string>('');
   const [reportMessage, setReportMessage] = useState<ReportMessage>({
     time: '',
@@ -42,25 +42,35 @@ const Camera: FC = () => {
 
     cameraRef.current.onmessage = (event) => {
       if (typeof (event.data) === 'string') {
-        try {
-          setReportLoading(true);
+        const result: {
+          head: 'smoke' | 'report';
+          body: string | {
+            'time': string;
+            'message': string;
+            'image': string;
+          }
+        } = JSON.parse(event.data);
 
-          const result: {
-            time: string,
-            message: string,
-            image: string
-          } = JSON.parse(event.data);
-
-          setReportMessage({
-            time: result.time,
-            message: result.message
-          });
-  
-          setReportImage(`data:image/png;base64,${result.image}`);
-        } catch (error) {
+        if (result.head === 'smoke') {
           setSmokeLoading(true);
 
-          setSmoke(`data:image/png;base64,${event.data}`);
+          setSmokeImage(`data:image/png;base64,${result.body}`);
+        } else if (result.head === 'report') {
+
+          setReportLoading(true);
+
+          const report = result.body as {
+            'time': string;
+            'message': string;
+            'image': string;
+          };
+
+          setReportMessage({
+            time: report.time,
+            message: report.message
+          });
+
+          setReportImage(`data:image/png;base64,${report.image}`);
         }
       } else {
         setCameraLoading(true);
@@ -109,7 +119,7 @@ const Camera: FC = () => {
         )}
         {(smokeLoading) ? (
           <img
-            src={smoke}
+            src={smokeImage}
             alt="video"
             width="640px"
             height="480px"
@@ -168,4 +178,4 @@ const Camera: FC = () => {
   );
 }
 
-export default Camera;
+export default Home;
